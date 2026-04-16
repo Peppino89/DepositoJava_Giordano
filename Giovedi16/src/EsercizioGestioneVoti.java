@@ -81,6 +81,9 @@ public class EsercizioGestioneVoti {
 
         // Messaggio finale
         System.out.println("Sei uscito dal programma: ");
+
+         //Chiudo lo scanner
+        input.close();
     }
 
     // Metodo per calcolare la media dei voti
