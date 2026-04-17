@@ -16,12 +16,12 @@ public class Main {
         ArrayList<ArrayList<Double>> storicoRisultatiPerUtente = new ArrayList<>();
 
         boolean iniziaProgramma = true;
-        1
+
         while (iniziaProgramma) {
             System.out.println("\n====== Menu =======");
-            System.out.println("1. Registrazione");
-            System.out.println("2. Login");
-            System.out.println("3. Esci ");
+            System.out.println("Digita 1 per Registrazione");
+            System.out.println("Digita 2 Login");
+            System.out.println("Digita 3 Esci ");
             int scelta = input.nextInt();
             switch (scelta) {
 
@@ -143,7 +143,24 @@ public class Main {
 
             int  scelta = input.nextInt();
             switch (scelta) {
-                case 1:boolean ok =
+                case 1:
+                    boolean ok = usaCalcolatrice(input,indiceUtente,storicoValoriPerUtente,storicoOperazioniPerUtente,storicoRisultatiPerUtente);
+                if (ok) {
+                    contatoreOperzioni++;
+                    if(contatoreOperzioni==4){
+                        System.out.println("Logout automatico");
+                        loggato=false;
+                    }
+                }
+                break;
+                case 2: mostraStorico(indiceUtente,storicoValoriPerUtente,storicoOperazioniPerUtente,storicoRisultatiPerUtente);
+                        break;
+
+                case 4:loggato=false;
+                break;
+
+                default: System.out.println("Operazione non valida");
+                break;
             }
         }
 
@@ -170,11 +187,11 @@ public class Main {
             }
 
             System.out.println("Inserisci Operazioni: ");
-            System.out.println("1 Somma");
-            System.out.println("2 Sottrazione");
-            System.out.println("3 Moltiplicazione");
-            System.out.println("4 Divisione");
-            System.out.println("5 Media");
+            System.out.println("Digita 1 Somma");
+            System.out.println("Digita 2 Sottrazione");
+            System.out.println("Digita 3 Moltiplicazione");
+            System.out.println("Digita 4 Divisione");
+            System.out.println("Digita 5 Media");
 
             int typeOperazione = input.nextInt();
 
@@ -268,13 +285,16 @@ public class Main {
                                      ArrayList<ArrayList<String>>storicoOperazioniPerUtente,
                                      ArrayList<ArrayList<Double>>storicoRisultatiPerUtente) {
 
-        if(storicoValoriPerUtente.size()==0){
+        if(storicoValoriPerUtente.get(indiceUtente).isEmpty()){
             System.out.println("nessuno Storico al momento: ");
 
             return;//esci dal programma
         }
 
-      for()
+      for(int i =0; i < storicoValoriPerUtente.size() ; i++){
+          System.out.println("Operazione"+
+                  storicoOperazioniPerUtente.get(i).get(indiceUtente)+" | Risultato Operazione:  "+ storicoRisultatiPerUtente.get(i).get(indiceUtente)+" | Valori 2 "+ storicoValoriPerUtente.get(i).get(indiceUtente));
+      }
     }
 
 
