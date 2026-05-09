@@ -11,4 +11,3 @@ public class Admin extends UtenteObserver{
         System.out.println("[NOTIFICA ADMIN "+super.getNomeUtente()+"] "+messaggio);
     }
 }
-

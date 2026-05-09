@@ -1,7 +1,7 @@
 package service;
 
 import model.Admin;
-import model.Utente;
+import model.UtenteObserver;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,7 @@ public class AuthService {
 
     private static AuthService instance;
 
-    private ArrayList<Utente> utenti;
+    private ArrayList<UtenteObserver> utenti;
 
     private AuthService(){
         this.utenti = new ArrayList<>();
@@ -32,16 +32,16 @@ public class AuthService {
         }
 
         //Altrimenti viene creato e registrato
-        Utente utente = new Utente(nomeUtente,password,"USER");
+        UtenteObserver utente = new UtenteObserver(nomeUtente,password,"USER");
         utenti.add(utente);
 
         return true;
     }
 
 
-    public Utente loginUtente(String nomeUtente, String password){
+    public UtenteObserver loginUtente(String nomeUtente, String password){
 
-        for(Utente utente : utenti){
+        for(UtenteObserver utente : utenti){
 
             if (utente.getNomeUtente().equals(nomeUtente) && utente.getPassword().equals(password)){
                 return utente;
@@ -55,7 +55,7 @@ public class AuthService {
 
     //Metodo privato booleano che mi serve per verificare che l'utente non sia già registrato
     private boolean utenteEsistente(String username){
-        for(Utente utente : utenti){
+        for(UtenteObserver utente : utenti){
             if (utente.getNomeUtente().equals(username)){
                 return true;
             }
