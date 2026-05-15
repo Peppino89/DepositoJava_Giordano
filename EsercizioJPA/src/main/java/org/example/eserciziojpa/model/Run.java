@@ -1,43 +1,62 @@
 package org.example.eserciziojpa.model;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
-import jakarta.persistence.*;
 
+
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "runs")
-public class Run {
-
+public class Run
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "title", nullable = false, length = 255)
+    @NotBlank
+    @Size(min = 3, max = 100, message = "il titolo deve avere tra i 3 e i 100 caratteri" )
     private String title;
 
-    @Column(name = "started_on", nullable = false)
+    @Column(name = "startedOn")
+    @NotNull(message = "la data di inizio è obbligatoria")
     private LocalDateTime startedOn;
 
-    @Column(name = "completed_on", nullable = false)
+    @Column(name = "completedOn")
+    @NotNull(message = "la data di fine è obbligatoria")
     private LocalDateTime completedOn;
 
-    @Column(name = "miles", nullable = false)
-    private double miles;
+    @Column(name = "miles")
+    @Positive(message = "la distanza percorsa deve essere positiva")
+    @Max(value = 200, message = "Non si può registrare oltre i 200 chilometri")
+    private Integer miles;
 
-    @Enumerated(EnumType.STRING)  // salva il nome dell'enum come stringa ("INDOOR"/"OUTDOOR")
-    @Column(name = "location", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "location")
+    @NotNull(message = "La location è obbligatoria")
     private Location location;
 
-    // ── Costruttore no-arg richiesto da JPA ──────────────────────────────────
     protected Run() {}
 
-    // ── Costruttore completo per uso applicativo ─────────────────────────────
-    public Run(String title, LocalDateTime startedOn, LocalDateTime completedOn,
-               double miles, Location location) {
-        if (miles < 0) throw new IllegalArgumentException("Le miglia non possono essere negative");
-        if (completedOn.isBefore(startedOn)) throw new IllegalArgumentException("La data di fine deve essere dopo quella di inizio");
+    public Run (
+            String title,
+            LocalDateTime startedOn,
+            LocalDateTime completedOn,
+            Integer miles,
+            Location location)
+    {
         this.title = title;
         this.startedOn = startedOn;
         this.completedOn = completedOn;
@@ -45,24 +64,32 @@ public class Run {
         this.location = location;
     }
 
-    // ── Getter ───────────────────────────────────────────────────────────────
-    public Integer getId() { return id; }
-    public String getTitle() { return title; }
-    public LocalDateTime getStartedOn() { return startedOn; }
-    public LocalDateTime getCompletedOn() { return completedOn; }
-    public double getMiles() { return miles; }
-    public Location getLocation() { return location; }
 
-    // ── Setter ───────────────────────────────────────────────────────────────
-    public void setTitle(String title) { this.title = title; }
-    public void setStartedOn(LocalDateTime startedOn) { this.startedOn = startedOn; }
-    public void setCompletedOn(LocalDateTime completedOn) { this.completedOn = completedOn; }
-    public void setMiles(double miles) { this.miles = miles; }
-    public void setLocation(Location location) { this.location = location; }
+    public Integer getId() {return id;}
+    public String getTitle() {return title;}
+    public LocalDateTime getStartedOn() {return startedOn;}
+    public LocalDateTime getCompletedOn() {return completedOn;}
+    public Integer getMiles() {return miles;}
+    public Location getLocation() {return location;}
 
-    // ── toString ─────────────────────────────────────────────────────────────
+
+    public void setId(Integer id) {this.id = id;}
+    public void setTitle(String title) {this.title = title;}
+    public void setStartedOn(LocalDateTime startedOn) {this.startedOn = startedOn;}
+    public void setCompletedOn(LocalDateTime completedOn) {this.completedOn = completedOn;}
+    public void setMiles(Integer miles) {this.miles = miles;}
+    public void setLocation(Location location) {this.location = location;}
+
+    // toString method
     @Override
     public String toString() {
-        return "Run{id=" + id + ", title='" + title + "', miles=" + miles + ", location=" + location + "}";
+        return "Run{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", startedOn=" + startedOn +
+                ", completedOn=" + completedOn +
+                ", miles=" + miles +
+                ", location=" + location +
+                '}';
     }
 }

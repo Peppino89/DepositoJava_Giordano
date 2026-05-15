@@ -1,70 +1,95 @@
 package org.example.eserciziojpa.controller;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.example.eserciziojpa.model.Run;
-import org.example.eserciziojpa.repository.RunRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.eserciziojpa.service.RunService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/runs")
 public class RunController {
 
-    private final RunRepository runRepository;
+    private final RunService runService;
 
-    @Autowired// Iniezione via costruttore (raccomandata)
-    public RunController(RunRepository runRepository) {
-        this.runRepository = runRepository;
+    public RunController(RunService runService){
+        this.runService = runService;
     }
 
-    // GET /api/runs → lista tutte le corse
     @GetMapping
-    public List<Run> findAll() {
-        return runRepository.findAll();
+    public List<Run> findAll(){
+        return runService.findAll();
     }
 
-    // GET /api/runs/{id} → singola corsa
     @GetMapping("/{id}")
     public ResponseEntity<Run> findById(@PathVariable Integer id) {
-        Optional<Run> run = runRepository.findById(id);
+        Optional<Run> run = runService.findById(id);
         return run.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST /api/runs → crea nuova corsa
     @PostMapping
-    public ResponseEntity<Run> create(@RequestBody Run run) {
-        Run saved = runRepository.save(run);
-        return ResponseEntity.status(201).body(saved);
+    public ResponseEntity<?> create(@Valid @RequestBody Run run, BindingResult bindingResult)
+    {
+        if(bindingResult.hasErrors()){
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.put(error.getField(), error.getDefaultMessage())
+            );
+            System.out.println(errors);
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(runService.save(run));
     }
 
-    // PUT /api/runs/{id} → aggiorna corsa esistente
     @PutMapping("/{id}")
-    public ResponseEntity<Run> update(@PathVariable Integer id, @RequestBody Run runDetails) {
-        Optional<Run> existing = runRepository.findById(id);
-        if (existing.isEmpty()) {
+    public ResponseEntity<?> update(@PathVariable Integer id,
+                                    @Valid @RequestBody Run runDetails,
+                                    BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.put(error.getField(), error.getDefaultMessage())
+            );
+
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        Run updated = runService.update(id, runDetails);
+
+        if (updated == null) {
             return ResponseEntity.notFound().build();
         }
-        Run run = existing.get();
-        run.setTitle(runDetails.getTitle());
-        run.setStartedOn(runDetails.getStartedOn());
-        run.setCompletedOn(runDetails.getCompletedOn());
-        run.setMiles(runDetails.getMiles());
-        run.setLocation(runDetails.getLocation());
-        Run updated = runRepository.save(run);
+
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE /api/runs/{id} → elimina corsa
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (!runRepository.existsById(id)) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id){
+        if(runService.findById(id).isEmpty()){
             return ResponseEntity.notFound().build();
         }
-        runRepository.deleteById(id);
+
+        runService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
