@@ -1,59 +1,87 @@
 package org.example.eserciziojpa.service;
 
-
+import org.example.eserciziojpa.dto.RunRequest;
+import org.example.eserciziojpa.dto.RunResponse;
 import org.example.eserciziojpa.model.Run;
 import org.example.eserciziojpa.repository.RunRepository;
 import org.example.eserciziojpa.run.RunNotFoundException;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RunService {
 
     private final RunRepository runRepository;
 
-    // Iniezione via costruttore (raccomandata)
     public RunService(RunRepository runRepository) {
         this.runRepository = runRepository;
     }
 
-    public List<Run> findAll() {
-        return runRepository.findAll();
+    public List<RunResponse> findAll() {
+        return runRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Run findById(Integer id) {
+    public RunResponse findById(Integer id) {
+        Run run = runRepository.findById(id)
+                .orElseThrow(() -> new RunNotFoundException(id));
 
-        return runRepository.findById(id)
-                .orElseThrow(()->new RunNotFoundException(id));
+        return toResponse(run);
     }
 
-    public Run save(Run run) {
-        return runRepository.save(run);
+    public RunResponse save(RunRequest request) {
+        Run run = toEntity(request);
+
+        Run savedRun = runRepository.save(run);
+
+        return toResponse(savedRun);
     }
 
-    public void deleteById(Integer id) {
-        if(!runRepository.existsById(id)) {
-            throw new RunNotFoundException(id);
-        }
-        runRepository.deleteById(id);
+    public RunResponse update(Integer id, RunRequest request) {
+        Run run = runRepository.findById(id)
+                .orElseThrow(() -> new RunNotFoundException(id));
+
+        run.setTitle(request.title());
+        run.setStartedOn(request.startedOn());
+        run.setCompletedOn(request.completedOn());
+        run.setMiles(request.miles());
+        run.setLocation(request.location());
+
+        Run updatedRun = runRepository.save(run);
+
+        return toResponse(updatedRun);
     }
 
-    public Run update(Integer id, Run updatedRun) {
-        Optional<Run> existing = runRepository.findById(id);
-        if(existing.isEmpty()){
-            return null;
-        }
+    public RunResponse deleteById(Integer id) {
+        Run run = runRepository.findById(id)
+                .orElseThrow(() -> new RunNotFoundException(id));
 
-        Run run = existing.get();
-        run.setTitle(updatedRun.getTitle());
-        run.setStartedOn(updatedRun.getStartedOn());
-        run.setCompletedOn(updatedRun.getCompletedOn());
-        run.setMiles(updatedRun.getMiles());
-        run.setLocation(updatedRun.getLocation());
+        runRepository.delete(run);
 
-        return runRepository.save(run);
+        return toResponse(run);
+    }
+
+    private Run toEntity(RunRequest request) {
+        return new Run(
+                request.title(),
+                request.startedOn(),
+                request.completedOn(),
+                request.miles(),
+                request.location()
+        );
+    }
+
+    private RunResponse toResponse(Run run) {
+        return new RunResponse(
+                run.getId(),
+                run.getTitle(),
+                run.getStartedOn(),
+                run.getCompletedOn(),
+                run.getMiles(),
+                run.getLocation()
+        );
     }
 }
